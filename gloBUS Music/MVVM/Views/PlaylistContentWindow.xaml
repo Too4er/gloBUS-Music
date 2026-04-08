@@ -5,21 +5,56 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:gloBUS_Music.MVVM.Views"
         mc:Ignorable="d"
-        Title="PlaylistContentWindow" Height="450" Width="800">
-    <Grid>
+        Title="PlaylistContentWindow"
+        Height="450"
+        Width="700"
+        WindowStartupLocation="CenterOwner">
+
+    <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="{Binding PlaylistName}" FontSize="18" Margin="10"/>
+        <TextBlock Grid.Row="0"
+                   Text="{Binding Name}"
+                   FontSize="20"
+                   FontWeight="Bold"
+                   Margin="0,0,0,10"/>
 
-        <ListBox Grid.Row="1" x:Name="PlaylistTracksListBox" DisplayMemberPath="Title" Margin="10"/>
+        <ListBox Grid.Row="1"
+                 x:Name="PlaylistTracksListBox"
+                 Margin="0,0,0,10">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding Artist}" Opacity="0.7"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
-            <Button Content="Remove Track" Click="RemoveTrackFromPlaylist_Click" Margin="5"/>
-            <Button Content="Close" Click="Close_Click" Margin="5"/>
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button Content="Remove Track"
+                    Click="RemoveTrackFromPlaylist_Click"
+                    Margin="0,0,10,0"
+                    Padding="12,6"
+                    Background="#FFB300"
+                    Foreground="Black"
+                    FontWeight="Bold"
+                    BorderThickness="0"/>
+
+            <Button Content="Close"
+                    Click="Close_Click"
+                    Padding="12,6"
+                    Background="#6200EE"
+                    Foreground="White"
+                    FontWeight="Bold"
+                    BorderThickness="0"/>
         </StackPanel>
     </Grid>
 </Window>

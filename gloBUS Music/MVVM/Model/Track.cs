@@ -14,6 +14,12 @@ namespace gloBUS_Music.MVVM.Model
         public int Duration { get; set; } // Длительность
         public string Link { get; set; } // Ссылки
 
+        public List<Playlist> Playlists { get; set; }
+
+        public Track()
+        {
+            Playlists = new List<Playlist>();
+        }
 
     }
 }

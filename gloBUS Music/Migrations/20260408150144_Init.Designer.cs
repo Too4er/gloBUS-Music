@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using gloBUS_Music.Data;
 
@@ -10,9 +11,11 @@ using gloBUS_Music.Data;
 namespace gloBUS_Music.Migrations
 {
     [DbContext(typeof(gloBUS_MusicDbContext))]
-    partial class gloBUS_MusicDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260408150144_Init")]
+    partial class Init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

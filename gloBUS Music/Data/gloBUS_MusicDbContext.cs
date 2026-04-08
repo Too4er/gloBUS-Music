@@ -18,7 +18,12 @@ namespace gloBUS_Music.Data
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder); 
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Playlist>()
+                .HasMany(p => p.Tracks)
+                .WithMany(t => t.Playlists)
+                .UsingEntity(j => j.ToTable("PlaylistTracks"));
         }
     }
 }

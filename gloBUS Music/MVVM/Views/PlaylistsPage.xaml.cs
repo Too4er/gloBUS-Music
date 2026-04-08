@@ -1,43 +1,36 @@
 ﻿using gloBUS_Music.Data;
-using gloBUS_Music.MVVM.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using gloBUS_Music.MVVM.ViewModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace gloBUS_Music.MVVM.Views
 {
     public partial class PlaylistsPage : Page
     {
         private readonly gloBUS_MusicDbContext _context;
+        private readonly PlaylistsViewModel _viewModel;
 
         public PlaylistsPage(gloBUS_MusicDbContext context)
         {
             InitializeComponent();
             _context = context;
-            // Логика инициализации страницы плейлистов
+            _viewModel = new PlaylistsViewModel(_context);
+            DataContext = _viewModel;
         }
 
-        private void PlaylistsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void OpenPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            // Логика обработки изменения выбора
-            var selectedPlaylist = (sender as ListBox)?.SelectedItem;
-            if (selectedPlaylist != null)
+            if (_viewModel.SelectedPlaylist == null)
             {
-                // Действия с выбранным элементом
-                Console.WriteLine($"Выбрано: {selectedPlaylist}");
+                MessageBox.Show("Выберите плейлист.");
+                return;
             }
+
+            var window = new PlaylistContentWindow(_viewModel.SelectedPlaylist, _context);
+            window.Owner = Window.GetWindow(this);
+            window.ShowDialog();
+
+            _viewModel.Refresh();
         }
     }
 }
-

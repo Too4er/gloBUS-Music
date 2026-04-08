@@ -1,60 +1,60 @@
-﻿using gloBUS_Music.MVVM.Model;
-using System;
-using System.Collections.Generic;
+﻿using gloBUS_Music.Data;
+using gloBUS_Music.MVVM.Model;
+using gloBUS_Music.MVVM.Services;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-
-// Убедитесь, что System.Windows.Controls.Primitives не подключен, если не нужен
-
-
 
 namespace gloBUS_Music.MVVM.Views
 {
-    /// <summary>
-    /// Логика взаимодействия для PlaylistContentWindow.xaml
-    /// </summary>
     public partial class PlaylistContentWindow : Window
     {
-        private readonly Playlist _playlist;
+        private readonly PlaylistService _playlistService;
+        private Playlist _playlist;
 
-        public PlaylistContentWindow(Playlist playlist)
+        public PlaylistContentWindow(Playlist playlist, gloBUS_MusicDbContext context)
         {
             InitializeComponent();
-            _playlist = playlist;
+            _playlistService = new PlaylistService(context);
+            _playlist = _playlistService.GetPlaylistById(playlist.Id) ?? playlist;
             DataContext = _playlist;
             LoadPlaylistTracks();
         }
 
         private void LoadPlaylistTracks()
         {
-            // Загрузите треки плейлиста из базы данных и привяжите их к ListBox
-            PlaylistTracksListBox.ItemsSource = _playlist.Tracks;
+            PlaylistTracksListBox.ItemsSource = null;
+            PlaylistTracksListBox.ItemsSource = _playlist.Tracks.OrderBy(t => t.Title).ToList();
         }
 
         private void RemoveTrackFromPlaylist_Click(object sender, RoutedEventArgs e)
         {
-            if (PlaylistTracksListBox.SelectedItem is Track selectedTrack)
+            if (PlaylistTracksListBox.SelectedItem is not Track selectedTrack)
             {
-                // Удалите трек из плейлиста
-                _playlist.Tracks.Remove(selectedTrack);
+                MessageBox.Show("Выберите трек.");
+                return;
+            }
+
+            var removed = _playlistService.RemoveTrackFromPlaylist(_playlist.Id, selectedTrack.Id);
+
+            if (!removed)
+            {
+                MessageBox.Show("Не удалось удалить трек из плейлиста.");
+                return;
+            }
+
+            var updatedPlaylist = _playlistService.GetPlaylistById(_playlist.Id);
+
+            if (updatedPlaylist != null)
+            {
+                _playlist = updatedPlaylist;
+                DataContext = _playlist;
                 LoadPlaylistTracks();
             }
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            Close();
         }
     }
 }
-
