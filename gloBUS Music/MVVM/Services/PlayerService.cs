@@ -7,10 +7,16 @@ public class PlayerService
 {
     private MediaElement _player;
     private string _currentUrl;
+    private double _volume = 0.5;
 
     public void Init(MediaElement player)
     {
         _player = player;
+
+        if (_player != null)
+        {
+            _player.Volume = _volume;
+        }
     }
 
     public void Play(string url)
@@ -55,5 +61,14 @@ public class PlayerService
             return _player.NaturalDuration.TimeSpan.TotalSeconds;
 
         return 0;
+    }
+    public void SetVolume(double volume)
+    {
+        _volume = Math.Max(0, Math.Min(1, volume));
+
+        if (_player != null)
+        {
+            _player.Volume = _volume;
+        }
     }
 }

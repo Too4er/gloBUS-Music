@@ -104,6 +104,53 @@
                         Foreground="White"
                         FontWeight="Bold"
                         BorderThickness="0"/>
+
+                
+                <Grid Margin="5,0,0,0">
+                    <Button x:Name="VolumeButton"
+                            Margin="5"
+                            Padding="10,5"
+                            Background="#F5F5F5"
+                            Foreground="Black"
+                            FontWeight="Bold"
+                            BorderThickness="0"
+                            MouseEnter="VolumeButton_MouseEnter"
+                            MouseLeave="VolumeButton_MouseLeave">
+                        <TextBlock Text="🔊" FontSize="16"/>
+                    </Button>
+
+                   
+                    <Popup x:Name="VolumePopup"
+                           PlacementTarget="{Binding ElementName=VolumeButton}"
+                           Placement="Top"
+                           AllowsTransparency="True"
+                           StaysOpen="True"
+                           PopupAnimation="Fade">
+                        <Border Background="White"
+                                BorderBrush="#E0E0E0"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Padding="10"
+                                MouseEnter="VolumePopup_MouseEnter"
+                                MouseLeave="VolumePopup_MouseLeave">
+                            <StackPanel HorizontalAlignment="Center">
+                                <Slider Minimum="0"
+                                        Maximum="1"
+                                        Value="{Binding Volume, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Orientation="Vertical"
+                                        Height="120"
+                                        Width="30"
+                                        TickFrequency="0.05"
+                                        IsMoveToPointEnabled="True"/>
+
+                                <TextBlock Text="{Binding VolumePercentText}"
+                                           Margin="0,8,0,0"
+                                           HorizontalAlignment="Center"
+                                           FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
             </StackPanel>
         </Grid>
     </Border>

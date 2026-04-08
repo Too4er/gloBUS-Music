@@ -32,8 +32,10 @@ namespace gloBUS_Music.MVVM.ViewModel
         private string _totalTime = "00:00";
         private bool _isUserSeeking = false;
         private bool _isPlaying = false;
+        private double _volume = 0.5;
 
         public Track NewTrack { get; set; }
+        public string VolumePercentText => $"{(int)Math.Round(Volume * 100)}%";
         public bool CanRemoveTrack => SelectedTrack != null;
         public bool CanPlayTrack => SelectedTrack != null && !string.IsNullOrEmpty(SelectedTrack.Link);
 
@@ -92,6 +94,25 @@ namespace gloBUS_Music.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+
+        public double Volume
+        {
+            get => _volume;
+            set
+            {
+                var normalizedValue = Math.Max(0, Math.Min(1, value));
+
+                if (Math.Abs(_volume - normalizedValue) < 0.001)
+                    return;
+
+                _volume = normalizedValue;
+                _playerService.SetVolume(_volume);
+
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(VolumePercentText));
+            }
+        }
+
         public Track SelectedTrack
         {
             get => _selectedTrack;
@@ -133,7 +154,7 @@ namespace gloBUS_Music.MVVM.ViewModel
         public void InitPlayer(MediaElement player)
         {
             _playerService.Init(player);
-
+            _playerService.SetVolume(Volume);
             if (!_progressTimer.IsEnabled)
                 _progressTimer.Start();
             CommandManager.InvalidateRequerySuggested();
@@ -220,8 +241,6 @@ namespace gloBUS_Music.MVVM.ViewModel
                 detectedDuration = 0;
             }
 
-            // ИЗМЕНЕНИЕ: если пользователь не ввёл название или ввёл только пробелы,
-            // подставляем определённое автоматически
             NewTrack.Title = string.IsNullOrWhiteSpace(currentTitle) ? detectedTitle : currentTitle;
             NewTrack.Artist = detectedArtist;
             NewTrack.Duration = detectedDuration;
