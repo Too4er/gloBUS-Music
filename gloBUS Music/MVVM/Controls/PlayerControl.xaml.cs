@@ -11,12 +11,8 @@ namespace gloBUS_Music.MVVM.Controls
     public partial class PlayerControl : UserControl
     {
         private TracksViewModel _viewModel;
-
-        
         private readonly DispatcherTimer _volumePopupOpenTimer;
         private readonly DispatcherTimer _volumePopupCloseTimer;
-
-        
         private bool _isMouseOverVolumeButton;
         private bool _isMouseOverVolumePopup;
 
@@ -81,7 +77,11 @@ namespace gloBUS_Music.MVVM.Controls
             _viewModel?.HandleTrackEnded();
         }
 
-        
+        private void VolumeButton_Click(object sender, RoutedEventArgs e)
+        {
+            _viewModel?.ToggleMute();
+        }
+
         private void VolumeButton_MouseEnter(object sender, MouseEventArgs e)
         {
             _isMouseOverVolumeButton = true;

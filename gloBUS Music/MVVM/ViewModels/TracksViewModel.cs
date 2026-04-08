@@ -7,12 +7,10 @@ using System.IO;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace gloBUS_Music.MVVM.ViewModel
@@ -33,9 +31,9 @@ namespace gloBUS_Music.MVVM.ViewModel
         private bool _isUserSeeking = false;
         private bool _isPlaying = false;
         private double _volume = 0.5;
+        private double _previousVolume = 0.5;
 
         public Track NewTrack { get; set; }
-        public string VolumePercentText => $"{(int)Math.Round(Volume * 100)}%";
         public bool CanRemoveTrack => SelectedTrack != null;
         public bool CanPlayTrack => SelectedTrack != null && !string.IsNullOrEmpty(SelectedTrack.Link);
 
@@ -67,6 +65,7 @@ namespace gloBUS_Music.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+
         public double PlaybackDuration
         {
             get => _playbackDuration;
@@ -76,6 +75,7 @@ namespace gloBUS_Music.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+
         public string CurrentTime
         {
             get => _currentTime;
@@ -85,6 +85,7 @@ namespace gloBUS_Music.MVVM.ViewModel
                 OnPropertyChanged();
             }
         }
+
         public string TotalTime
         {
             get => _totalTime;
@@ -106,12 +107,26 @@ namespace gloBUS_Music.MVVM.ViewModel
                     return;
 
                 _volume = normalizedValue;
+
+                if (_volume > 0.001)
+                {
+                    _previousVolume = _volume;
+                }
+
                 _playerService.SetVolume(_volume);
 
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(IsMuted));
+                OnPropertyChanged(nameof(VolumeIcon));
                 OnPropertyChanged(nameof(VolumePercentText));
             }
         }
+
+        public bool IsMuted => Volume <= 0.001;
+
+        public string VolumeIcon => IsMuted ? "🔈" : "🔊";
+
+        public string VolumePercentText => $"{(int)Math.Round(Volume * 100)}%";
 
         public Track SelectedTrack
         {
@@ -155,8 +170,10 @@ namespace gloBUS_Music.MVVM.ViewModel
         {
             _playerService.Init(player);
             _playerService.SetVolume(Volume);
+
             if (!_progressTimer.IsEnabled)
                 _progressTimer.Start();
+
             CommandManager.InvalidateRequerySuggested();
         }
 
@@ -345,6 +362,7 @@ namespace gloBUS_Music.MVVM.ViewModel
                 ? time.ToString(@"hh\:mm\:ss")
                 : time.ToString(@"mm\:ss");
         }
+
         public void BeginSeek()
         {
             _isUserSeeking = true;
@@ -376,13 +394,26 @@ namespace gloBUS_Music.MVVM.ViewModel
             CommandManager.InvalidateRequerySuggested();
         }
 
+        public void ToggleMute()
+        {
+            if (IsMuted)
+            {
+                Volume = _previousVolume > 0.001 ? _previousVolume : 0.5;
+            }
+            else
+            {
+                _previousVolume = Volume;
+                Volume = 0;
+            }
+        }
+
         private bool CanControlPlayback()
         {
             return true;
         }
 
-
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
