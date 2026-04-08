@@ -6,6 +6,7 @@ namespace gloBUS_Music.MVVM.Services;
 public class PlayerService
 {
     private MediaElement _player;
+    private string _currentUrl;
 
     public void Init(MediaElement player)
     {
@@ -14,9 +15,15 @@ public class PlayerService
 
     public void Play(string url)
     {
-        if (_player == null) return;
+        if (_player == null || string.IsNullOrWhiteSpace(url))
+            return;
 
-        _player.Source = new Uri(url);
+        if (_player.Source == null || !string.Equals(_currentUrl, url, StringComparison.OrdinalIgnoreCase))
+        {
+            _player.Source = new Uri(url, UriKind.Absolute);
+            _currentUrl = url;
+        }
+
         _player.Play();
     }
 

@@ -1,12 +1,11 @@
-﻿using gloBUS_Music.MVVM.Model;
-using gloBUS_Music.MVVM.Services;
-using gloBUS_Music.MVVM.ViewModel;
+﻿using gloBUS_Music.MVVM.ViewModel;
 using Microsoft.Win32;
+using gloBUS_Music.MVVM.Model;
+using gloBUS_Music.MVVM.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -21,9 +20,6 @@ using System.Windows.Shapes;
 
 namespace gloBUS_Music.MVVM.Views
 {
-    /// <summary>
-    /// Логика взаимодействия для TracksPage.xaml
-    /// </summary>
     public partial class TracksPage : Page
     {
         private readonly TracksViewModel _viewModel;
@@ -33,8 +29,7 @@ namespace gloBUS_Music.MVVM.Views
             InitializeComponent();
             _viewModel = viewModel;
             DataContext = _viewModel;
-            var vm = (TracksViewModel)DataContext;
-            vm.InitPlayer(Player);
+            _viewModel.InitPlayer(AudioPlayer);
         }
 
         private void AddTrack_Click(object sender, RoutedEventArgs e)
@@ -53,9 +48,9 @@ namespace gloBUS_Music.MVVM.Views
                 var newTrack = new Track
                 {
                     Title = fileName,
-                    Artist = "Unknown Artist", // Можно добавить получение артиста из метаданных
-                    Duration = 0, // Можно добавить логику получения длительности
-                    Link = filePath // Сохраняем полный путь
+                    Artist = "Unknown Artist",
+                    Duration = 0,
+                    Link = filePath
                 };
 
                 ((TracksViewModel)DataContext).AddTrack();
@@ -64,7 +59,6 @@ namespace gloBUS_Music.MVVM.Views
 
         private void RemoveTrack_Click(object sender, RoutedEventArgs e)
         {
-            // Теперь просто вызываем команду напрямую
             _viewModel.RemoveTrackCommand.Execute(TrackListBox.SelectedItem);
         }
     }

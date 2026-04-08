@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace gloBUS_Music.MVVM.ViewModel
 {
@@ -21,10 +22,13 @@ namespace gloBUS_Music.MVVM.ViewModel
         private readonly gloBUS_MusicDbContext _context;
         private readonly TrackService _trackService;
         private readonly PlayerService _playerService;
+        private readonly DispatcherTimer _progressTimer;
         private Track _selectedTrack;
         private bool _isPaused = false;
         private bool _isStopped = false;
-        private TimeSpan _pausedPosition = TimeSpan.Zero;
+        private double _playbackProgress;
+        private string _currentTime = "00:00";
+        private string _totalTime = "00:00";
 
         public Track NewTrack { get; set; }
         public bool CanRemoveTrack => SelectedTrack != null;
@@ -38,6 +42,33 @@ namespace gloBUS_Music.MVVM.ViewModel
 
         public ObservableCollection<Track> Tracks { get; set; }
 
+        public double PlaybackProgress
+        {
+            get => _playbackProgress;
+            set
+            {
+                _playbackProgress = value;
+                OnPropertyChanged();
+            }
+        }
+        public string CurrentTime
+        {
+            get => _currentTime;
+            set
+            {
+                _currentTime = value;
+                OnPropertyChanged();
+            }
+        }
+        public string TotalTime
+        {
+            get => _totalTime;
+            set
+            {
+                _totalTime = value;
+                OnPropertyChanged();
+            }
+        }
         public Track SelectedTrack
         {
             get => _selectedTrack;
@@ -55,6 +86,10 @@ namespace gloBUS_Music.MVVM.ViewModel
             _trackService = new TrackService(_context);
             _playerService = new PlayerService();
 
+            _progressTimer = new DispatcherTimer();
+            _progressTimer.Interval = TimeSpan.FromMilliseconds(500);
+            _progressTimer.Tick += UpdatePlaybackProgress;
+
             Tracks = new ObservableCollection<Track>();
             LoadTracks();
 
@@ -66,6 +101,14 @@ namespace gloBUS_Music.MVVM.ViewModel
             PlayTrackCommand = new RelayCommand(PlayTrack, CanPlayTrack);
             PauseTrackCommand = new RelayCommand(PauseTrack, CanControlPlayback);
             StopTrackCommand = new RelayCommand(StopTrack, CanControlPlayback);
+        }
+
+        public void InitPlayer(MediaElement player)
+        {
+            _playerService.Init(player);
+
+            if (!_progressTimer.IsEnabled)
+                _progressTimer.Start();
         }
 
         private void LoadTracks()
@@ -136,6 +179,8 @@ namespace gloBUS_Music.MVVM.ViewModel
 
             _isStopped = false;
             _isPaused = false;
+
+            UpdatePlaybackProgress(this, EventArgs.Empty);
         }
 
 /*        private void MediaOpenedHandler(object sender, EventArgs e)
@@ -149,17 +194,50 @@ namespace gloBUS_Music.MVVM.ViewModel
         {
             _playerService.Pause();
             _isPaused = true;
+            _isStopped = false;
+            UpdatePlaybackProgress(this, EventArgs.Empty);
         }
 
         private void StopTrack()
         {
             _playerService.Stop();
-
-            _pausedPosition = TimeSpan.Zero;
             _isPaused = false;
             _isStopped = true;
+            ResetPlaybackProgress();
         }
 
+        private void UpdatePlaybackProgress(object sender, EventArgs e)
+        {
+            var duration = _playerService.GetDuration();
+            var position = _playerService.GetPosition();
+
+            if (duration > 0)
+            {
+                PlaybackProgress = Math.Min(100, position / duration * 100);
+                TotalTime = FormatTime(TimeSpan.FromSeconds(duration));
+            }
+            else
+            {
+                PlaybackProgress = 0;
+                TotalTime = "00:00";
+            }
+
+            CurrentTime = FormatTime(TimeSpan.FromSeconds(position));
+        }
+
+        private void ResetPlaybackProgress()
+        {
+            PlaybackProgress = 0;
+            CurrentTime = "00:00";
+            TotalTime = "00:00";
+        }
+
+        private string FormatTime(TimeSpan time)
+        {
+            return time.TotalHours >= 1
+                ? time.ToString(@"hh\:mm\:ss")
+                : time.ToString(@"mm\:ss");
+        }
         private bool CanPlayTrack()
         {
             return SelectedTrack != null && !string.IsNullOrEmpty(SelectedTrack.Link);
@@ -170,10 +248,6 @@ namespace gloBUS_Music.MVVM.ViewModel
             return true;
         }
 
-        public void InitPlayer(MediaElement player)
-        {
-            _playerService.Init(player);
-        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
