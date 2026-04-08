@@ -9,12 +9,16 @@ namespace gloBUS_Music.MVVM.Views
     public partial class MainWindow : Window
     {
         private readonly gloBUS_MusicDbContext _context;
+        private readonly TracksViewModel _tracksViewModel;
 
         public MainWindow()
         {
             InitializeComponent();
 
             _context = new gloBUS_MusicDbContext();
+            _tracksViewModel = new TracksViewModel();
+
+            GlobalPlayerControl.DataContext = _tracksViewModel;
 
             NavigationMenu.NavigateToTracks += NavigateToTracks_Click;
             NavigationMenu.NavigateToPlaylists += NavigateToPlaylists_Click;
@@ -24,8 +28,7 @@ namespace gloBUS_Music.MVVM.Views
 
         private void NavigateToTracks()
         {
-            var vm = new TracksViewModel();
-            MainFrame.Navigate(new TracksPage(vm));
+            MainFrame.Navigate(new TracksPage(_tracksViewModel));
         }
 
         private void NavigateToTracks_Click(object sender, EventArgs e)

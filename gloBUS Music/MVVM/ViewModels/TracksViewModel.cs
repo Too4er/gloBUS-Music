@@ -1,9 +1,9 @@
 ﻿using gloBUS_Music.Data;
 using gloBUS_Music.MVVM.Core;
-using gloBUS_Music.MVVM.Core;
 using gloBUS_Music.MVVM.Model;
 using gloBUS_Music.MVVM.Services;
 using Microsoft.Win32;
+using System.IO;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -31,10 +31,11 @@ namespace gloBUS_Music.MVVM.ViewModel
         private string _currentTime = "00:00";
         private string _totalTime = "00:00";
         private bool _isUserSeeking = false;
-
+        private bool _isPlaying = false;
 
         public Track NewTrack { get; set; }
         public bool CanRemoveTrack => SelectedTrack != null;
+        public bool CanPlayTrack => SelectedTrack != null && !string.IsNullOrEmpty(SelectedTrack.Link);
 
         public ICommand SelectFileCommand { get; }
         public ICommand AddTrackCommand { get; }
@@ -44,6 +45,16 @@ namespace gloBUS_Music.MVVM.ViewModel
         public ICommand StopTrackCommand { get; }
 
         public ObservableCollection<Track> Tracks { get; set; }
+
+        public bool IsPlaying
+        {
+            get => _isPlaying;
+            set
+            {
+                _isPlaying = value;
+                OnPropertyChanged();
+            }
+        }
 
         public double PlaybackProgress
         {
@@ -88,6 +99,10 @@ namespace gloBUS_Music.MVVM.ViewModel
             {
                 _selectedTrack = value;
                 OnPropertyChanged();
+
+                OnPropertyChanged(nameof(CanRemoveTrack));
+                OnPropertyChanged(nameof(CanPlayTrack));
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 
@@ -110,7 +125,7 @@ namespace gloBUS_Music.MVVM.ViewModel
             SelectFileCommand = new RelayCommand(SelectFile);
             AddTrackCommand = new RelayCommand(AddTrack);
             RemoveTrackCommand = new RelayCommand(RemoveTrack, () => CanRemoveTrack);
-            PlayTrackCommand = new RelayCommand(PlayTrack, CanPlayTrack);
+            PlayTrackCommand = new RelayCommand(PlayTrack, () => CanPlayTrack);
             PauseTrackCommand = new RelayCommand(PauseTrack, CanControlPlayback);
             StopTrackCommand = new RelayCommand(StopTrack, CanControlPlayback);
         }
@@ -121,6 +136,7 @@ namespace gloBUS_Music.MVVM.ViewModel
 
             if (!_progressTimer.IsEnabled)
                 _progressTimer.Start();
+            CommandManager.InvalidateRequerySuggested();
         }
 
         private void LoadTracks()
@@ -163,9 +179,65 @@ namespace gloBUS_Music.MVVM.ViewModel
 
             if (openFileDialog.ShowDialog() == true)
             {
-                NewTrack.Link = openFileDialog.FileName;
+                NewTrack.Link = NormalizeText(openFileDialog.FileName);
+                FillTrackMetadata(NewTrack.Link);
                 OnPropertyChanged(nameof(NewTrack));
             }
+        }
+
+        private void FillTrackMetadata(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+                return;
+
+            var currentTitle = NormalizeText(NewTrack.Title);
+            var detectedTitle = GetFallbackTitle(filePath);
+            var detectedArtist = "Unknown Artist";
+            var detectedDuration = 0;
+
+            try
+            {
+                var tagFile = TagLib.File.Create(filePath);
+
+                if (!string.IsNullOrWhiteSpace(tagFile.Tag.Title))
+                {
+                    detectedTitle = tagFile.Tag.Title.Trim();
+                }
+
+                if (tagFile.Tag.Performers != null &&
+                    tagFile.Tag.Performers.Length > 0 &&
+                    !string.IsNullOrWhiteSpace(tagFile.Tag.Performers[0]))
+                {
+                    detectedArtist = tagFile.Tag.Performers[0].Trim();
+                }
+
+                detectedDuration = (int)Math.Ceiling(tagFile.Properties.Duration.TotalSeconds);
+            }
+            catch
+            {
+                detectedTitle = GetFallbackTitle(filePath);
+                detectedArtist = "Unknown Artist";
+                detectedDuration = 0;
+            }
+
+            // ИЗМЕНЕНИЕ: если пользователь не ввёл название или ввёл только пробелы,
+            // подставляем определённое автоматически
+            NewTrack.Title = string.IsNullOrWhiteSpace(currentTitle) ? detectedTitle : currentTitle;
+            NewTrack.Artist = detectedArtist;
+            NewTrack.Duration = detectedDuration;
+            NewTrack.Link = NormalizeText(filePath);
+
+            OnPropertyChanged(nameof(NewTrack));
+        }
+
+        private string GetFallbackTitle(string filePath)
+        {
+            return Path.GetFileNameWithoutExtension(filePath)?.Trim() ?? string.Empty;
+        }
+
+        private string NormalizeText(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
         }
 
         private void RemoveTrack()
@@ -191,8 +263,10 @@ namespace gloBUS_Music.MVVM.ViewModel
 
             _isStopped = false;
             _isPaused = false;
+            IsPlaying = true;
 
             UpdatePlaybackProgress(this, EventArgs.Empty);
+            CommandManager.InvalidateRequerySuggested();
         }
 
         private void PauseTrack()
@@ -200,7 +274,9 @@ namespace gloBUS_Music.MVVM.ViewModel
             _playerService.Pause();
             _isPaused = true;
             _isStopped = false;
+            IsPlaying = false;
             UpdatePlaybackProgress(this, EventArgs.Empty);
+            CommandManager.InvalidateRequerySuggested();
         }
 
         private void StopTrack()
@@ -208,7 +284,9 @@ namespace gloBUS_Music.MVVM.ViewModel
             _playerService.Stop();
             _isPaused = false;
             _isStopped = true;
+            IsPlaying = false;
             ResetPlaybackProgress();
+            CommandManager.InvalidateRequerySuggested();
         }
 
         private void UpdatePlaybackProgress(object sender, EventArgs e)
@@ -270,9 +348,13 @@ namespace gloBUS_Music.MVVM.ViewModel
             _isUserSeeking = false;
         }
 
-        private bool CanPlayTrack()
+        public void HandleTrackEnded()
         {
-            return SelectedTrack != null && !string.IsNullOrEmpty(SelectedTrack.Link);
+            _isPaused = false;
+            _isStopped = true;
+            IsPlaying = false;
+            ResetPlaybackProgress();
+            CommandManager.InvalidateRequerySuggested();
         }
 
         private bool CanControlPlayback()

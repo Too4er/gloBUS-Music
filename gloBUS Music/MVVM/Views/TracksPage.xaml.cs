@@ -1,7 +1,7 @@
-﻿using gloBUS_Music.MVVM.Model;
-using gloBUS_Music.MVVM.Services;
-using gloBUS_Music.MVVM.ViewModel;
+﻿using gloBUS_Music.MVVM.ViewModel;
 using Microsoft.Win32;
+using gloBUS_Music.MVVM.Model;
+using gloBUS_Music.MVVM.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,14 +10,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace gloBUS_Music.MVVM.Views
 {
@@ -30,7 +22,6 @@ namespace gloBUS_Music.MVVM.Views
             InitializeComponent();
             _viewModel = viewModel;
             DataContext = _viewModel;
-            _viewModel.InitPlayer(AudioPlayer);
         }
 
         private void AddTrack_Click(object sender, RoutedEventArgs e)
@@ -46,7 +37,7 @@ namespace gloBUS_Music.MVVM.Views
                 var filePath = openFileDialog.FileName;
                 var fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
 
-                var newTrack = new gloBUS_Music.MVVM.Model.Track
+                var newTrack = new Track
                 {
                     Title = fileName,
                     Artist = "Unknown Artist",
@@ -61,21 +52,6 @@ namespace gloBUS_Music.MVVM.Views
         private void RemoveTrack_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.RemoveTrackCommand.Execute(TrackListBox.SelectedItem);
-        }
-        private void PlaybackSlider_DragStarted(object sender, DragStartedEventArgs e)
-        {
-            _viewModel.BeginSeek();
-        }
-        private void PlaybackSlider_DragCompleted(object sender, DragCompletedEventArgs e)
-        {
-            _viewModel.EndSeek(PlaybackSlider.Value);
-        }
-        private void PlaybackSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (PlaybackSlider.IsMouseCaptureWithin)
-            {
-                _viewModel.UpdateSeekPreview(PlaybackSlider.Value);
-            }
         }
     }
 }

@@ -1,0 +1,110 @@
+﻿<UserControl x:Class="gloBUS_Music.MVVM.Controls.PlayerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="120"
+             d:DesignWidth="600">
+
+    <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" Padding="10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <MediaElement x:Name="AudioPlayer"
+                          Grid.Row="0"
+                          LoadedBehavior="Manual"
+                          UnloadedBehavior="Stop"
+                          Width="1"
+                          Height="1"
+                          HorizontalAlignment="Center"
+                          MediaEnded="AudioPlayer_MediaEnded"/>
+
+            <StackPanel Grid.Row="1" Margin="0,0,0,10">
+                <Slider x:Name="PlaybackSlider"
+                        Value="{Binding PlaybackProgress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Maximum="{Binding PlaybackDuration}"
+                        Minimum="0"
+                        Height="20"
+                        Thumb.DragStarted="PlaybackSlider_DragStarted"
+                        Thumb.DragCompleted="PlaybackSlider_DragCompleted"
+                        ValueChanged="PlaybackSlider_ValueChanged"/>
+
+                <Grid Margin="0,5,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="{Binding CurrentTime}"
+                               Grid.Column="0"
+                               HorizontalAlignment="Left"
+                               FontWeight="SemiBold"/>
+
+                    <TextBlock Text="{Binding TotalTime}"
+                               Grid.Column="1"
+                               HorizontalAlignment="Right"
+                               FontWeight="SemiBold"/>
+                </Grid>
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Grid>
+                    <Button Content="▶ Play"
+                            Command="{Binding PlayTrackCommand}"
+                            IsEnabled="{Binding CanPlayTrack}"
+                            Margin="5"
+                            Padding="10,5"
+                            Background="#03DAC6"
+                            Foreground="Black"
+                            FontWeight="Bold"
+                            BorderThickness="0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button Content="⏸ Pause"
+                            Command="{Binding PauseTrackCommand}"
+                            Margin="5"
+                            Padding="10,5"
+                            Background="#FFB300"
+                            Foreground="Black"
+                            FontWeight="Bold"
+                            BorderThickness="0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+
+                <Button Content="⏹ Stop"
+                        Command="{Binding StopTrackCommand}"
+                        Margin="5"
+                        Padding="10,5"
+                        Background="#B00020"
+                        Foreground="White"
+                        FontWeight="Bold"
+                        BorderThickness="0"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

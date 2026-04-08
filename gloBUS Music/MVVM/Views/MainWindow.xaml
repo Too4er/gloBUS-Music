@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:local="clr-namespace:gloBUS_Music.MVVM.Controls" 
-    Title="MusiLand" Height="550" Width="800">
+    Title="gloBUS Music" Height="550" Width="800">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -14,10 +14,8 @@
     </Window.Resources>
 
     <DockPanel>
-        <!-- Используем кастомное навигационное меню -->
         <local:NavigationMenu x:Name="NavigationMenu" />
-        <MediaElement x:Name="Player" />
-        <!-- Основная область для контента -->
+        <local:PlayerControl x:Name="GlobalPlayerControl" DockPanel.Dock="Bottom" Margin="10" />
         <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden" />
     </DockPanel>
 </Window>
