@@ -8,9 +8,11 @@
         Title="PlaylistContentWindow"
         Height="450"
         Width="700"
-        WindowStartupLocation="CenterOwner">
+        Background="{StaticResource WindowBackgroundBrush}"
+        WindowStartupLocation="CenterOwner"
+        UseLayoutRounding="True">
 
-    <Grid Margin="10">
+    <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -19,22 +21,34 @@
 
         <TextBlock Grid.Row="0"
                    Text="{Binding Name}"
-                   FontSize="20"
+                   FontSize="22"
                    FontWeight="Bold"
-                   Margin="0,0,0,10"/>
+                   Foreground="{StaticResource TextBrush}"
+                   Margin="4,0,0,12"/>
 
-        <ListBox Grid.Row="1"
-                 x:Name="PlaylistTracksListBox"
-                 Margin="0,0,0,10">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel>
-                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
-                        <TextBlock Text="{Binding Artist}" Opacity="0.7"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+        <Border Grid.Row="1"
+                Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="24"
+                Padding="10"
+                Margin="0,0,0,12"
+                Effect="{StaticResource SoftShadowEffect}">
+            <ListBox Grid.Row="1"
+                     x:Name="PlaylistTracksListBox"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     ItemContainerStyle="{StaticResource MusicListBoxItemStyle}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding Artist}" Opacity="0.75"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
 
         <StackPanel Grid.Row="2"
                     Orientation="Horizontal"
@@ -42,19 +56,11 @@
             <Button Content="Remove Track"
                     Click="RemoveTrackFromPlaylist_Click"
                     Margin="0,0,10,0"
-                    Padding="12,6"
-                    Background="#FFB300"
-                    Foreground="Black"
-                    FontWeight="Bold"
-                    BorderThickness="0"/>
+                    Style="{StaticResource SecondaryButtonStyle}"/>
 
             <Button Content="Close"
                     Click="Close_Click"
-                    Padding="12,6"
-                    Background="#6200EE"
-                    Foreground="White"
-                    FontWeight="Bold"
-                    BorderThickness="0"/>
+                    Style="{StaticResource PrimaryButtonStyle}"/>
         </StackPanel>
     </Grid>
 </Window>
