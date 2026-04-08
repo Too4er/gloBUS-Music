@@ -112,9 +112,14 @@
                               HorizontalAlignment="Center"/>
 
                 <StackPanel Grid.Row="1" Margin="0,0,0,10" Width="400">
-                    <ProgressBar Value="{Binding PlaybackProgress}"
-                                 Maximum="100"
-                                 Height="10"/>
+                    <Slider x:Name="PlaybackSlider"
+                            Value="{Binding PlaybackProgress, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Maximum="{Binding PlaybackDuration}"
+                            Minimum="0"
+                            Height="20"
+                            Thumb.DragStarted="PlaybackSlider_DragStarted"
+                            Thumb.DragCompleted="PlaybackSlider_DragCompleted"
+                            ValueChanged="PlaybackSlider_ValueChanged"/>
 
                     <Grid Margin="0,5,0,0">
                         <Grid.ColumnDefinitions>
