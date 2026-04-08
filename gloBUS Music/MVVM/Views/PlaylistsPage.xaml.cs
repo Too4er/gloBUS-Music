@@ -1,5 +1,5 @@
-﻿using gloBUS_Music.MVVM.Model;
-using gloBUS_Music.MVVM.Services;
+﻿using gloBUS_Music.Data;
+using gloBUS_Music.MVVM.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;

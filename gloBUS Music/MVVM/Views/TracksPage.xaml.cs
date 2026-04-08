@@ -1,11 +1,12 @@
-﻿using gloBUS_Music.MVVM.ViewModel;
-using Microsoft.Win32;
-using gloBUS_Music.MVVM.Model;
+﻿using gloBUS_Music.MVVM.Model;
 using gloBUS_Music.MVVM.Services;
+using gloBUS_Music.MVVM.ViewModel;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -32,6 +33,8 @@ namespace gloBUS_Music.MVVM.Views
             InitializeComponent();
             _viewModel = viewModel;
             DataContext = _viewModel;
+            var vm = (TracksViewModel)DataContext;
+            vm.InitPlayer(Player);
         }
 
         private void AddTrack_Click(object sender, RoutedEventArgs e)

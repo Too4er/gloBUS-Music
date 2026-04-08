@@ -91,7 +91,7 @@
 
             <!-- Аудиоплеер -->
             <Grid Grid.Row="2" Margin="10" HorizontalAlignment="Center">
-                <MediaElement x:Name="AudioPlayer" LoadedBehavior="Manual" UnloadedBehavior="Stop" 
+                <MediaElement x:Name="Player" LoadedBehavior="Manual" UnloadedBehavior="Stop" 
                               Width="300" Height="50" HorizontalAlignment="Center"/>
 
                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">

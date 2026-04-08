@@ -1,14 +1,16 @@
-﻿using gloBUS_Music.MVVM.Core;
+﻿using gloBUS_Music.Data;
+using gloBUS_Music.MVVM.Core;
+using gloBUS_Music.MVVM.Core;
 using gloBUS_Music.MVVM.Model;
 using gloBUS_Music.MVVM.Services;
 using Microsoft.Win32;
-using gloBUS_Music.MVVM.Core;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -17,8 +19,9 @@ namespace gloBUS_Music.MVVM.ViewModel
     public class TracksViewModel : INotifyPropertyChanged
     {
         private readonly gloBUS_MusicDbContext _context;
+        private readonly TrackService _trackService;
+        private readonly PlayerService _playerService;
         private Track _selectedTrack;
-        private MediaPlayer _mediaPlayer = new MediaPlayer();
         private bool _isPaused = false;
         private bool _isStopped = false;
         private TimeSpan _pausedPosition = TimeSpan.Zero;
@@ -49,6 +52,9 @@ namespace gloBUS_Music.MVVM.ViewModel
         {
             _context = new gloBUS_MusicDbContext();
 
+            _trackService = new TrackService(_context);
+            _playerService = new PlayerService();
+
             Tracks = new ObservableCollection<Track>();
             LoadTracks();
 
@@ -65,7 +71,7 @@ namespace gloBUS_Music.MVVM.ViewModel
         private void LoadTracks()
         {
             Tracks.Clear();
-            var tracks = _context.Tracks.ToList();
+            var tracks = _trackService.GetAllTracks();
 
             foreach (var track in tracks)
             {
@@ -84,8 +90,7 @@ namespace gloBUS_Music.MVVM.ViewModel
                 return;
             }
 
-            _context.Tracks.Add(NewTrack);
-            _context.SaveChanges();
+            _trackService.AddTrack(NewTrack);
 
             Tracks.Add(NewTrack);
 
@@ -112,8 +117,7 @@ namespace gloBUS_Music.MVVM.ViewModel
         {
             if (SelectedTrack != null)
             {
-                _context.Tracks.Remove(SelectedTrack);
-                _context.SaveChanges();
+                _trackService.DeleteTrack(SelectedTrack.Id);
 
                 Tracks.Remove(SelectedTrack);
                 SelectedTrack = null;
@@ -128,52 +132,32 @@ namespace gloBUS_Music.MVVM.ViewModel
                 return;
             }
 
-            if (_isStopped || _mediaPlayer.Source == null)
-            {
-                _mediaPlayer.MediaOpened -= MediaOpenedHandler;
-                _mediaPlayer.MediaOpened += MediaOpenedHandler;
-                _mediaPlayer.Open(new Uri(SelectedTrack.Link, UriKind.Absolute));
-                _isStopped = false;
-            }
-            else if (_isPaused)
-            {
-                _mediaPlayer.Position = _pausedPosition;
-                _mediaPlayer.Play();
-                _isPaused = false;
-            }
-            else
-            {
-                _mediaPlayer.Play();
-            }
-        }
+            _playerService.Play(SelectedTrack.Link);
 
-        private void MediaOpenedHandler(object sender, EventArgs e)
-        {
-            _mediaPlayer.Play();
             _isStopped = false;
             _isPaused = false;
         }
 
+/*        private void MediaOpenedHandler(object sender, EventArgs e)
+        {
+            _mediaPlayer.Play();
+            _isStopped = false;
+            _isPaused = false;
+        }*/
+
         private void PauseTrack()
         {
-            if (_mediaPlayer.Source != null)
-            {
-                _pausedPosition = _mediaPlayer.Position;
-                _mediaPlayer.Pause();
-                _isPaused = true;
-            }
+            _playerService.Pause();
+            _isPaused = true;
         }
 
         private void StopTrack()
         {
-            if (_mediaPlayer.Source != null)
-            {
-                _mediaPlayer.Stop();
-                _mediaPlayer.Close();
-                _pausedPosition = TimeSpan.Zero;
-                _isPaused = false;
-                _isStopped = true;
-            }
+            _playerService.Stop();
+
+            _pausedPosition = TimeSpan.Zero;
+            _isPaused = false;
+            _isStopped = true;
         }
 
         private bool CanPlayTrack()
@@ -183,7 +167,12 @@ namespace gloBUS_Music.MVVM.ViewModel
 
         private bool CanControlPlayback()
         {
-            return _mediaPlayer != null;
+            return true;
+        }
+
+        public void InitPlayer(MediaElement player)
+        {
+            _playerService.Init(player);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

@@ -16,7 +16,7 @@
     <DockPanel>
         <!-- Используем кастомное навигационное меню -->
         <local:NavigationMenu x:Name="NavigationMenu" />
-
+        <MediaElement x:Name="Player" />
         <!-- Основная область для контента -->
         <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden" />
     </DockPanel>

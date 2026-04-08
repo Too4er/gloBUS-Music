@@ -1,8 +1,8 @@
 ﻿using gloBUS_Music.MVVM.ViewModel;
 using gloBUS_Music.MVVM.Views;
-using gloBUS_Music.MVVM.Services;
 using System;
 using System.Windows;
+using gloBUS_Music.Data;
 
 namespace gloBUS_Music.MVVM.Views
 {
